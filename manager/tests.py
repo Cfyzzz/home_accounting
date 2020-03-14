@@ -65,3 +65,40 @@ class ManagerCashItemsModelTests(TestCase):
         self.assertEqual(cashitem2.min_value, 10)
         self.assertEqual(cashitem2.plan_value, 40000)
         self.assertEqual(cashitem2.virtual_value, 3500)
+
+    def test_copy(self):
+        mgr = ManagerCashItems(date_begin=self.begin_day, date_end=self.end_day)
+        cashitem1 = mgr.append(name_item="Testing_mcic06", date_item=self.begin_day)
+        cashitem1.value = 10000
+        cashitem1.save()
+
+        cashitem2 = mgr.copy(source_cash_item=cashitem1)
+        mgr.update()
+        self.assertEqual(len(mgr.cash_items), 1)
+        self.assertEqual(cashitem2.value, cashitem1.value)
+
+        cashitem2.save()
+        mgr.update()
+        self.assertEqual(len(mgr.cash_items), 2)
+
+    def test_get_total(self):
+        mgr = ManagerCashItems(date_begin=self.begin_day, date_end=self.end_day)
+        cashitem1 = mgr.append(name_item="Testing_mcigt07", date_item=self.begin_day)
+        cashitem1.value = 10000
+        cashitem1.min_value = 0
+        cashitem1.plan_value = 50000
+        cashitem1.virtual_value = 3500
+        cashitem1.save()
+
+        cashitem2 = mgr.append(name_item="Testing_mcigt07", date_item=self.begin_day)
+        cashitem2.value = 15000
+        cashitem2.min_value = 10
+        cashitem2.plan_value = 40000
+        cashitem2.virtual_value = 3500
+        cashitem2.save()
+        self.assertEqual(len(mgr.cash_items), 2)
+
+        total = mgr.get_total()
+        self.assertEqual(total[0], 25000)
+        self.assertEqual(total[1], 90000)
+        self.assertEqual(total[2], 7000)

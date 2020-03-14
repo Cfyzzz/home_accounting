@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cashitem.apps.CashitemConfig',
     'manager.apps.ManagerConfig',
+    'controlmgr.apps.ControlmgrConfig',
 ]
 
 MIDDLEWARE = [

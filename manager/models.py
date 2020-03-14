@@ -1,5 +1,3 @@
-from django.db import models
-
 from cashitem.models import CashItem, NamesCashItem
 
 
@@ -31,7 +29,9 @@ class ManagerCashItems:
         :param name_item: название статьи (строка)
         """
         name_cashitem = NamesCashItem.objects.filter(name=name_item)
-        if not name_cashitem.exists():
+        if name_cashitem.exists():
+            name_cashitem = name_cashitem[0]
+        else:
             name_cashitem = NamesCashItem(name=name_item)
             name_cashitem.save()
 
@@ -49,7 +49,7 @@ class ManagerCashItems:
         self.update()
 
     def replace(self, dest_cash_item, source_cash_item):
-        """Переписать запись таблицы менеджера
+        """Переписать запись таблицы менеджера. Статья не меняется!
 
         :param dest_cash_item: запись-приёмник
         :param source_cash_item: запись-источник
@@ -61,12 +61,29 @@ class ManagerCashItems:
         dest_cash_item.virtual_value = source_cash_item.virtual_value
         dest_cash_item.save()
 
-    def copy(self, row):
-        """Скопировать запись таблицы менеджера
+    def copy(self, source_cash_item):
+        """Скопировать запись таблицы менеджера. Запись сама не сохранеяяется!
 
-        :param row: копируемая запись
+        :param source_cash_item: копируемая запись
         :return CashItem: новая запись
         """
+        dest_cash_item = CashItem(name=source_cash_item.name,
+                                  date=source_cash_item.date,
+                                  min_value=source_cash_item.min_value,
+                                  value=source_cash_item.value,
+                                  plan_value=source_cash_item.plan_value,
+                                  virtual_value=source_cash_item.virtual_value)
+        return dest_cash_item
+
+    def get_total(self):
+        """Получить сводную информацию по периоду
+
+        :return value, plan_value, virtual_value
+        """
+        self.update()
+        total_info = ((ci.value, ci.plan_value, ci.virtual_value) for ci in self.cash_items)
+        value, plan_value, virtual_value = map(sum, zip(*total_info))
+        return value, plan_value, virtual_value
 
     def update(self):
         """Обновить состав статей"""
@@ -75,55 +92,3 @@ class ManagerCashItems:
     class Mets:
         verbose_name = u"менеджер планирования"
         verbose_name_plural = u"менеджеры планирования"
-
-
-class ControlManager(models.Model):
-    user = models.CharField(max_length=40)
-    manager = models.ForeignKey(CashItem, on_delete=models.CASCADE)
-
-    def create_manager(self):
-        """Создать менеджера"""
-
-    def get_managers(self):
-        """Получить список менеджеров"""
-
-    def delete_manager(self, manager):
-        """Удалить менеджера
-
-        :param manager: удаляемый менеджер
-        """
-
-    def copy_manager(self, manager):
-        """Копирование менеджера
-
-        :param manager: копируемый менеджер
-        :return ManagerCashItems: новый менеджер
-        """
-
-    def get_managers_by_date(self, date):
-        """Получить всех менеджеров по дате
-
-        :param date: дата, на которую получаем менеджеров
-        :return list of ManagerCashItems
-        """
-
-    def get_total_manager_by_date(self, date):
-        """Получить сводную информацию по всем менеджерам на дату
-
-        :param date: дата, на которую получаем менеджеров
-        :return list of CashItem
-        """
-
-    def distribute_money(self, rows, money):
-        """Разнести приход по статьям
-
-        :param rows: записи, среди которых нужно распределить деньги
-        :param money: сумма распределения
-        """
-
-    def flow(self, row_source, row_dest):
-        """Проводка движения денег между статьями
-
-        :param row_source: запись-источник
-        :param row_dest: запись-приёмник
-        """
