@@ -1,12 +1,15 @@
 from django.db import models
 
-from cashitem.models import CashItem
+from cashitem.models import CashItem, NamesCashItem
 
 
-class ManagerCashItems(models.Model):
-    date_begin = models.DateField(verbose_name=u"Начало периода")
-    date_end = models.DateField(verbose_name=u"Конец периода")
-    cash_item = models.ForeignKey(CashItem, on_delete=models.CASCADE)
+class ManagerCashItems:
+
+    def __init__(self, date_begin, date_end):
+        self.date_begin = date_begin
+        self.date_end = date_end
+        self.cash_items = []
+        self.update()
 
     def __unicode__(self):
         return f"{self.date_begin} - {self.date_end}"
@@ -19,7 +22,31 @@ class ManagerCashItems(models.Model):
         """
         self.date_begin = begin
         self.date_end = end
-        self.save()
+        self.update()
+
+    def append(self, name_item, date_item):
+        """Добавить запись в менеджер
+
+        :param date_item: дата записи
+        :param name_item: название статьи (строка)
+        """
+        name_cashitem = NamesCashItem.objects.filter(name=name_item)
+        if not name_cashitem.exists():
+            name_cashitem = NamesCashItem(name=name_item)
+            name_cashitem.save()
+
+        row = CashItem(name=name_cashitem, date=date_item)
+        row.save()
+        self.update()
+        return row
+
+    def remove(self, cash_item):
+        """Удалить запись из менеджера
+
+        :param cash_item: удаляемая запись
+        """
+        cash_item.delete()
+        self.update()
 
     def replace(self, dest_cash_item, source_cash_item):
         """Переписать запись таблицы менеджера
@@ -40,6 +67,10 @@ class ManagerCashItems(models.Model):
         :param row: копируемая запись
         :return CashItem: новая запись
         """
+
+    def update(self):
+        """Обновить состав статей"""
+        self.cash_items = list(CashItem.objects.filter(date__range=(self.date_begin, self.date_end)))
 
     class Mets:
         verbose_name = u"менеджер планирования"
@@ -96,19 +127,3 @@ class ControlManager(models.Model):
         :param row_source: запись-источник
         :param row_dest: запись-приёмник
         """
-
-    def append(self, cash_item):
-        """Добавить запись в менеджер
-
-        :param cash_item: добавляемая статья
-        """
-        row = ManagerCashItems(date_begin=self.manager.date_begin, date_end=self.manager.date_end, cash_item=cash_item)
-        row.save()
-
-    def remove(self, cash_item):
-        """Удалить запись из менеджера
-
-        :param cash_item: удаляемая запись
-        """
-        row = ManagerCashItems.objects.filter(cash_item=cash_item)
-        row.delete()
