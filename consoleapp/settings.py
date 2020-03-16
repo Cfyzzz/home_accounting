@@ -5,19 +5,19 @@ MENU = [
     },
     {
         "name": "Списание",
-        "scenario": None
+        "scenario": "write-off"
     },
     {
         "name": "Просмотр",
-        "scenario": None
+        "scenario": "review"
     },
     {
         "name": "Редактирование",
-        "scenario": None
+        "scenario": "edit"
     },
     {
         "name": "Настройка статей",
-        "scenario": None
+        "scenario": "setting"
     }
 ]
 
@@ -26,12 +26,68 @@ SCENARIOS = {
         "first_step": "step1",
         "steps": {
             "step1": {
-                "text": "",
+                "text": "Выбрать период",
                 "next_step": "step2"
             },
             "step2": {
-                "text": "",
+                "text": "Выбрать статью",
                 "next_step": "step3"
+            },
+            "step3": {
+                "text": "Указать сумму",
+                "next_step": "step2"
+            }
+        }
+    },
+    "write-off": {
+        "first_step": "step1",
+        "steps": {
+            "step1": {
+                "text": "Выбрать месяц",
+                "next_step": "ste2"
+            },
+            "step2": {
+                "text": "Выбрать статью",
+                "next_step": "step3"
+            },
+            "step3": {
+                "text": "Указать сумму",
+                "next_step": None
+            }
+        }
+    },
+    "edit": {
+        "first_step": "step1",
+        "steps": {
+            "step1": {
+                "text": "Выбрать период",
+                "next_step": "ste2"
+            },
+            "step2": {
+                "text": "Выбрать статью",
+                "next_step": "step3"
+            },
+            "step3": {
+                "text": "Указать сумму",
+                "next_step": None
+            }
+        }
+    },
+    "review": {
+        "first_step": "step1",
+        "steps": {
+            "step1": {
+                "text": "Выбрать период",
+                "next_step": None
+            }
+        }
+    },
+    "setting": {
+        "first_step": "step1",
+        "steps": {
+            "step1": {
+                "text": "Настроить статьи",
+                "next_step": None
             }
         }
     }
