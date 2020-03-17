@@ -27,14 +27,17 @@ SCENARIOS = {
         "steps": {
             "step1": {
                 "text": "Выбрать период",
+                "function_name": "select period",
                 "next_step": "step2"
             },
             "step2": {
                 "text": "Выбрать статью",
+                "function_name": "select cashitem",
                 "next_step": "step3"
             },
             "step3": {
                 "text": "Указать сумму",
+                "function_name": "set summa",
                 "next_step": "step2"
             }
         }
