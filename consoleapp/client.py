@@ -3,13 +3,16 @@ from datetime import datetime
 import consoleapp.settings as settings
 import re
 
-from cashitem.models import CashItem
-from manager.models import ManagerCashItems
+from models import CashItem, ManagerCashItems
+
 
 PREF = "# "
 PATTERN_DATE = r'(0?[1-9]|1[0-2]).\d{4}'
 DATE_FORMAT = f'^{PATTERN_DATE}$'
 PERIOD_FORMAT = f'^{PATTERN_DATE} {PATTERN_DATE}$'
+
+
+manager = ManagerCashItems()
 
 
 class HomeAccountConsole:
@@ -42,15 +45,15 @@ class HomeAccountConsole:
                 dates.reverse()
 
             self.period = dates
-            ManagerCashItems.set_period_manager(*self.period)
+            manager.set_period_manager(*self.period)
             return
 
         if step["function_name"] == "select cashitem":
-            if CashItem.objects.count() == 0:
+            if CashItem.select().count() == 0:
                 self.new_cashitem()
 
             print("\tВыберете статью:")
-            cashitems = CashItem.objects.all()
+            cashitems = CashItem.select()
             for idx, item in enumerate(cashitems, 1):
                 print('\t', idx, item.name)
 
