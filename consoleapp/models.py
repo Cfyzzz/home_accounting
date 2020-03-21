@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 
 import peewee
@@ -87,6 +88,19 @@ class ManagerCashItems:
         self.date_begin = begin
         self.date_end = end
         self.update()
+
+    def planning(self, name_item, plan):
+        """Планирование суммы по статье на установленный период
+
+        :param name_item: название статьи (строка)
+        :param plan: планируемая сумма на период
+        """
+        number_months = 12*(self.date_end.year-self.date_begin.year)+(self.date_end.month-self.date_begin.month)+1
+        plan_item = math.ceil(plan / number_months)
+        for _ in range(number_months):
+            pass
+            # TODO - Проверить, что есть такая статья и переопределить сумму
+            #  или созадть статью с суммой
 
     def append(self, name_item, date_item):
         """Добавить запись в менеджер

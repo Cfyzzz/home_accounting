@@ -3,7 +3,7 @@ from datetime import datetime
 import consoleapp.settings as settings
 import re
 
-from models import CashItem, ManagerCashItems
+from models import CashItem, ManagerCashItems, NamesCashItem
 
 
 PREF = "# "
@@ -19,6 +19,7 @@ class HomeAccountConsole:
 
     def __init__(self):
         self.period = []
+        self.current_cashitem_name = None
 
     def show_menu(self):
         """Показать меню"""
@@ -49,15 +50,25 @@ class HomeAccountConsole:
             return
 
         if step["function_name"] == "select cashitem":
-            if CashItem.select().count() == 0:
+            if NamesCashItem.select().count() == 0:
                 self.new_cashitem()
 
             print("\tВыберете статью:")
-            cashitems = CashItem.select()
-            for idx, item in enumerate(cashitems, 1):
+            cashitem_names = NamesCashItem.select()
+            for idx, item in enumerate(cashitem_names, 1):
                 print('\t', idx, item.name)
 
-            select = self._get_user_select(cashitems)
+            select = self._get_user_select(cashitem_names)
+            self.current_cashitem_name = cashitem_names[select]
+
+        if step["function_name"] == "set summa":
+            user_summa = ""
+            while user_summa.isdigit():
+                user_summa = input(PREF)
+
+            summa = int(user_summa)
+            # TODO - Планирование суммы на период по статье
+            # TODO - Возможность завершить работу с периодом (сценарием)
 
 
     def _get_user_select(self, items):
@@ -69,7 +80,14 @@ class HomeAccountConsole:
                     return select
 
     def new_cashitem(self):
-        pass
+        caption = "Создание новой статьи"
+        print('-' * len(caption))
+        print("\tУкажите название статьи:")
+        user_item_name = ""
+        while user_item_name == "":
+            user_item_name = input(PREF)
+
+        NamesCashItem(name=user_item_name)
 
 
 class UserState:
