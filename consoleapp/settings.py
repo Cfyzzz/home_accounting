@@ -81,6 +81,12 @@ SCENARIOS = {
         "steps": {
             "step1": {
                 "text": "Выбрать период",
+                "function_name": "select period",
+                "next_step": "step2"
+            },
+            "step2": {
+                "text": "Просмотр",
+                "function_name": "view period",
                 "next_step": None
             }
         }

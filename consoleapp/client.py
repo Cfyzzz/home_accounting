@@ -4,6 +4,7 @@ import consoleapp.settings as settings
 import re
 
 from models import CashItem, ManagerCashItems, NamesCashItem
+from prettytable import PrettyTable
 
 
 PREF = "# "
@@ -64,6 +65,14 @@ class HomeAccountConsole:
                 return
 
             self.current_cashitem_name = cashitem_names[select]
+
+        if step["function_name"] == "view period":
+            table = manager.get_sorting_rows()
+            table_show = PrettyTable()
+            table_show.field_names = table[0]
+            for row in table[1:]:
+                table_show.add_row(row)
+            print(table_show)
 
         if step["function_name"] == "set summa":
             print("\tУкажите общую сумму на заданный период по статье")

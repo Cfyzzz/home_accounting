@@ -165,9 +165,60 @@ class ManagerCashItems:
         value, plan_value, virtual_value = map(sum, zip(*total_info))
         return value, plan_value, virtual_value
 
+    def get_sorting_rows(self):
+        """Возвращает отсортированную таблицу
+        [Номер строки, Статья, Дата, План, Текущее значение]
+        """
+        rows = []
+        row_numbers = {}
+        current_number = 0
+        col_dates = []
+        for cashitem in self.cash_items:
+            name = cashitem.name.name
+            if not name in row_numbers:
+                current_number += 1
+                row_numbers[name] = current_number
+
+            date = cashitem.date
+            if not date in col_dates:
+                col_dates.append(date)
+
+            number = row_numbers[name]
+            row = dict(
+                number=number,
+                name=cashitem.name.name,
+                date=cashitem.date,
+                plan=cashitem.plan_value,
+                value=cashitem.value + cashitem.virtual_value
+            )
+            rows.append(row)
+
+        col_dates.sort()
+        rows.sort(key=lambda x: x['number'])
+
+        table = [["Number", "Cash item"]]
+        table[0].extend(col_dates)
+        current_number = 0
+        for row in rows:
+            new_row = [row['number'], row['name']]
+            for date in col_dates:
+                sub_row = [0, 0]
+                if row['date'] == date:
+                    sub_row = [row['plan'], row['value']]
+                new_row.append(sub_row)
+
+            if row['number'] == current_number:
+                recent_row = table[-1]
+                result_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(recent_row[2:], new_row[2:])))
+                table[-1][2:] = result_row
+            else:
+                current_number = row['number']
+                table.append(new_row)
+        return table
+
     def update(self):
         """Обновить состав статей"""
-        self.cash_items = list(CashItem.select().where(self.date_begin < CashItem.date < self.date_end))
+        self.cash_items = list(CashItem.select().where(self.date_begin <= CashItem.date <= self.date_end))
 
     class Mets:
         verbose_name = u"менеджер планирования"
