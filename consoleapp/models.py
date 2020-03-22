@@ -97,8 +97,14 @@ class ManagerCashItems:
         """
         number_months = 12*(self.date_end.year-self.date_begin.year)+(self.date_end.month-self.date_begin.month)+1
         plan_item = math.ceil(plan / number_months)
-        for _ in range(number_months):
-            date_item = self.date_begin + timedelta(0, 1, 0, 0, 0)
+        for delta in range(number_months):
+            month = self.date_begin.month + delta
+            year = self.date_begin.year
+            if month > 12:
+                month = month % 12
+                year += month // 12
+
+            date_item = datetime(year, month, 1).date()
             data = {'date': date_item, 'plan_value': plan_item, 'name': name_item}
             CashItem.insert(data).execute()
 
