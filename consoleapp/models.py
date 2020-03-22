@@ -1,5 +1,5 @@
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import peewee
 
@@ -98,9 +98,9 @@ class ManagerCashItems:
         number_months = 12*(self.date_end.year-self.date_begin.year)+(self.date_end.month-self.date_begin.month)+1
         plan_item = math.ceil(plan / number_months)
         for _ in range(number_months):
-            pass
-            # TODO - Проверить, что есть такая статья и переопределить сумму
-            #  или созадть статью с суммой
+            date_item = self.date_begin + timedelta(0, 1, 0, 0, 0)
+            data = {'date': date_item, 'plan_value': plan_item, 'name': name_item}
+            CashItem.insert(data).execute()
 
     def append(self, name_item, date_item):
         """Добавить запись в менеджер

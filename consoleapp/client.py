@@ -58,36 +58,45 @@ class HomeAccountConsole:
             for idx, item in enumerate(cashitem_names, 1):
                 print('\t', idx, item.name)
 
-            select = self._get_user_select(cashitem_names)
+            select = self._get_user_select(cashitem_names, extend=['[Выход]'])
+            if select == len(cashitem_names):
+                step["next_step"] = None
+                return
+
             self.current_cashitem_name = cashitem_names[select]
 
         if step["function_name"] == "set summa":
+            print("\tУкажите общую сумму на заданный период по статье")
             user_summa = ""
-            while user_summa.isdigit():
+            while not user_summa.isdigit():
                 user_summa = input(PREF)
 
             summa = int(user_summa)
-            # TODO - Планирование суммы на период по статье
-            # TODO - Возможность завершить работу с периодом (сценарием)
+            manager.planning(self.current_cashitem_name, summa)
 
+    def _get_user_select(self, items, extend=[]):
+        for idx, ext in enumerate(extend, len(items) + 1):
+            print("\t", idx, ext)
 
-    def _get_user_select(self, items):
         while True:
             user_select = input(PREF)
+            max_value = len(items) + len(extend)
             if user_select.isdigit():
                 select = int(user_select[:1]) - 1
-                if 0 <= select < len(items):
+                if 0 <= select < max_value:
                     return select
 
     def new_cashitem(self):
         caption = "Создание новой статьи"
+        print(caption)
         print('-' * len(caption))
         print("\tУкажите название статьи:")
         user_item_name = ""
         while user_item_name == "":
             user_item_name = input(PREF)
 
-        NamesCashItem(name=user_item_name)
+        row = NamesCashItem(name=user_item_name)
+        row.save()
 
 
 class UserState:
