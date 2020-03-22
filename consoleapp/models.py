@@ -202,9 +202,10 @@ class ManagerCashItems:
         col_dates.sort()
         rows.sort(key=lambda x: x['number'])
 
-        table = [["Number", "Cash item"]]
+        table = [["№", u"Статья"]]
         table[0].extend(col_dates)
         current_number = 0
+        total_row = [[0, 0]] * len(col_dates)
         for row in rows:
             new_row = [row['number'], row['name']]
             for date in col_dates:
@@ -220,11 +221,19 @@ class ManagerCashItems:
             else:
                 current_number = row['number']
                 table.append(new_row)
+
+            total_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(new_row[2:], total_row)))
+
+        split_line = ["---"] * (len(col_dates) + 2)
+        table.append(split_line)
+        total = ["", "ИТОГО"]
+        total.extend(total_row)
+        table.append(total)
         return table
 
     def update(self):
         """Обновить состав статей"""
-        self.cash_items = list(CashItem.select().where(self.date_begin <= CashItem.date <= self.date_end))
+        self.cash_items = list(CashItem.select().where(CashItem.date.between(self.date_begin, self.date_end)))
 
     class Mets:
         verbose_name = u"менеджер планирования"
