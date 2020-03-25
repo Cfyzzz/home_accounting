@@ -175,6 +175,42 @@ class ManagerCashItems:
         """Возвращает отсортированную таблицу
         [Номер строки, Статья, Дата, План, Текущее значение]
         """
+        col_dates, rows = self._get_rows_from_current_cashitems()
+        table = self._get_table_by_format_from_dates_and_rows(col_dates, rows)
+        return table
+
+    @staticmethod
+    def _get_table_by_format_from_dates_and_rows(col_dates, rows):
+        table = [["№", u"Статья"]]
+        table[0].extend(col_dates)
+        current_number = 0
+        total_row = [[0, 0]] * len(col_dates)
+        for row in rows:
+            new_row = [row['number'], row['name']]
+            for date in col_dates:
+                sub_row = [0, 0]
+                if row['date'] == date:
+                    sub_row = [row['plan'], row['value']]
+                new_row.append(sub_row)
+
+            if row['number'] == current_number:
+                recent_row = table[-1]
+                result_row = list(
+                    map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(recent_row[2:], new_row[2:])))
+                table[-1][2:] = result_row
+            else:
+                current_number = row['number']
+                table.append(new_row)
+
+            total_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(new_row[2:], total_row)))
+        split_line = ["---"] * (len(col_dates) + 2)
+        table.append(split_line)
+        total = ["", "ИТОГО"]
+        total.extend(total_row)
+        table.append(total)
+        return table
+
+    def _get_rows_from_current_cashitems(self):
         rows = []
         row_numbers = {}
         current_number = 0
@@ -198,38 +234,21 @@ class ManagerCashItems:
                 value=cashitem.value + cashitem.virtual_value
             )
             rows.append(row)
-
         col_dates.sort()
         rows.sort(key=lambda x: x['number'])
+        return col_dates, rows
 
-        table = [["№", u"Статья"]]
-        table[0].extend(col_dates)
-        current_number = 0
-        total_row = [[0, 0]] * len(col_dates)
-        for row in rows:
-            new_row = [row['number'], row['name']]
-            for date in col_dates:
-                sub_row = [0, 0]
-                if row['date'] == date:
-                    sub_row = [row['plan'], row['value']]
-                new_row.append(sub_row)
+    def writeoff(self, summa, cashitem_name):
+        """Списание средств по статье
 
-            if row['number'] == current_number:
-                recent_row = table[-1]
-                result_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(recent_row[2:], new_row[2:])))
-                table[-1][2:] = result_row
-            else:
-                current_number = row['number']
-                table.append(new_row)
+        :param summa: сумма списания
+        :param cashitem_name: статья списания
+        """
+        cashitem = CashItem.get(name=cashitem_name)
+        cashitem.min_value += summa
+        cashitem.value -= summa
 
-            total_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(new_row[2:], total_row)))
 
-        split_line = ["---"] * (len(col_dates) + 2)
-        table.append(split_line)
-        total = ["", "ИТОГО"]
-        total.extend(total_row)
-        table.append(total)
-        return table
 
     def update(self):
         """Обновить состав статей"""

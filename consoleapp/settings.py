@@ -47,15 +47,28 @@ SCENARIOS = {
         "steps": {
             "step1": {
                 "text": "Выбрать месяц",
-                "next_step": "ste2"
+                "function_name": "select month",
+                "next_step": "step2"
             },
             "step2": {
                 "text": "Выбрать статью",
+                "function_name": "select cashitem",
                 "next_step": "step3"
             },
             "step3": {
                 "text": "Указать сумму",
+                "function_name": "write-off summa",
                 "next_step": None
+            }
+        }
+    },
+    "distribute income": {
+        "first_step": "step1",
+        "steps": {
+            "step1": {
+                "text": "",
+                "function_name": "",
+                "next_step": ""
             }
         }
     },
@@ -64,7 +77,7 @@ SCENARIOS = {
         "steps": {
             "step1": {
                 "text": "Выбрать период",
-                "next_step": "ste2"
+                "next_step": "step2"
             },
             "step2": {
                 "text": "Выбрать статью",

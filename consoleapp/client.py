@@ -83,6 +83,28 @@ class HomeAccountConsole:
             summa = int(user_summa)
             manager.planning(self.current_cashitem_name, summa)
 
+        if step["function_name"] == "select month":
+            print("\tУкажите месяц в формате mm.yyyy")
+            user_line = ""
+            while not re.fullmatch(DATE_FORMAT, user_line):
+                user_line = input(PREF)
+
+            dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
+            dates = dates * 2
+            self.period = dates
+            manager.set_period_manager(*self.period)
+            return
+
+        if step["function_name"] == "write-off summa":
+            print("\tУкажите сумму списания")
+            user_summa = ""
+            while not user_summa.isdigit():
+                user_summa = input(PREF)
+
+            summa = int(user_summa)
+            manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
+
+
     def _get_user_select(self, items, extend=[]):
         for idx, ext in enumerate(extend, len(items) + 1):
             print("\t", idx, ext)
