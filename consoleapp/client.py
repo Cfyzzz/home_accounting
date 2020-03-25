@@ -104,8 +104,17 @@ class HomeAccountConsole:
             summa = int(user_summa)
             manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
 
+        if step["function_name"] == "distribute money":
+            pass
+            # TODO - вызвать распределение и построить таблицу
+            #  Возможность отредактировать распредление.
+            #  В итоге нужно прниять или отклонить распределение
 
-    def _get_user_select(self, items, extend=[]):
+    @staticmethod
+    def _get_user_select(self, items, extend=None):
+        if not extend:
+            extend = []
+
         for idx, ext in enumerate(extend, len(items) + 1):
             print("\t", idx, ext)
 

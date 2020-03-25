@@ -248,7 +248,30 @@ class ManagerCashItems:
         cashitem.min_value += summa
         cashitem.value -= summa
 
+    def distribute_money(self, summa):
+        """Предлагает распеределение суммы между статьями
 
+        :param summa: сумма к распределению
+        :return {cashitem_name: value, ...}
+        """
+        self.update()
+        value, plan_value, virtual_value = self.get_total()
+        balance_plan = plan_value - value
+        accum = 0
+        values = {}
+        for cashitem in self.cash_items:
+            _koeff = (cashitem.plan_value - cashitem.value) // balance_plan
+            _share = round(summa * _koeff)
+            if cashitem not in values:
+                values[cashitem.name] = _share
+            else:
+                values[cashitem.name] += _share
+            accum += _share
+        else:
+            if len(self.cash_items):
+                values[self.cash_items[-1].name] += summa - accum
+
+        return values
 
     def update(self):
         """Обновить состав статей"""

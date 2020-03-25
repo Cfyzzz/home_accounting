@@ -8,6 +8,10 @@ MENU = [
         "scenario": "write-off"
     },
     {
+        "name": "Распределить приход",
+        "scenario": "distribute income"
+    },
+    {
         "name": "Просмотр",
         "scenario": "review"
     },
@@ -66,9 +70,14 @@ SCENARIOS = {
         "first_step": "step1",
         "steps": {
             "step1": {
-                "text": "",
-                "function_name": "",
-                "next_step": ""
+                "text": "Выбрать период",
+                "function_name": "select period",
+                "next_step": "step2"
+            },
+            "step2": {
+                "text": "Укажите сумму распределения",
+                "function_name": "distribute money",
+                "next_step": None
             }
         }
     },
