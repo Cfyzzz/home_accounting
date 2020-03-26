@@ -111,7 +111,7 @@ class HomeAccountConsole:
             #  В итоге нужно прниять или отклонить распределение
 
     @staticmethod
-    def _get_user_select(self, items, extend=None):
+    def _get_user_select(items, extend=None):
         if not extend:
             extend = []
 
@@ -126,7 +126,8 @@ class HomeAccountConsole:
                 if 0 <= select < max_value:
                     return select
 
-    def new_cashitem(self):
+    @staticmethod
+    def new_cashitem():
         caption = "Создание новой статьи"
         print(caption)
         print('-' * len(caption))
@@ -156,4 +157,3 @@ if __name__ == "__main__":
         state.step = state.scenario["steps"][next_step_name]
         ha.execute_step(state.step)
         next_step_name = state.step['next_step']
-

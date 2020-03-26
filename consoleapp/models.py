@@ -257,6 +257,7 @@ class ManagerCashItems:
         self.update()
         value, plan_value, virtual_value = self.get_total()
         balance_plan = plan_value - value
+        summa = min(summa, balance_plan)
         accum = 0
         values = {}
         for cashitem in self.cash_items:
