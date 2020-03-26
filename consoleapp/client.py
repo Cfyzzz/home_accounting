@@ -105,10 +105,94 @@ class HomeAccountConsole:
             manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
 
         if step["function_name"] == "distribute money":
-            pass
-            # TODO - вызвать распределение и построить таблицу
-            #  Возможность отредактировать распредление.
-            #  В итоге нужно прниять или отклонить распределение
+            # print("\tУкажите сумму распределения")
+            user_summa = ""
+            while not user_summa.isdigit():
+                user_summa = input(PREF)
+
+            summa = int(user_summa)
+            balance = manager.distribute_money(summa)
+            table = self._make_table(balance)
+            print(table)
+            print("[y(д) - commit], [n(н) - cancel], [cashitem summa [other_cashitem(s)]]")
+            print("1 1000 - оставить на статье №1 сумму 1000 из поступления, остальное распределить по статьям А")
+            print("1 2000 3 - оставить на статье №1 сумму 2000, остальное распределить на статью №3")
+            print("1 3000 2 4 - оставить на статье №1 сумму 3000, остальное распределить на статьи №2 и №4")
+
+            commit = self._user_input_distribute_money(table)
+            if commit:
+                self._commit(balance)
+
+    def _user_input_distribute_money(self, table):
+        """Работа пользователя с таблицей распределения"""
+
+        is_valid = False
+        commit = False
+        while not is_valid:
+            user_line = input(PREF)
+            if user_line in 'yYдД':
+                commit = True
+                is_valid = True
+            elif user_line in 'nNнН':
+                is_valid = True
+
+            parse_line = re.finditer(r"\d*", user_line)
+            input_values = [int(r.group()) for r in parse_line if r.group() and r.group().isdigit()]
+            if len(input_values) == 2:
+                self._flow_to_other(table, input_values)
+            if len(input_values) > 2:
+                self._flow_set(table, input_values)
+        return commit
+
+    def _flow_to_other(self, table: PrettyTable, values):
+        """Перекидывает деньги со строки values[0] суммой values[1] на статьи, отмеченные А
+
+        :param table: таблица распределения
+        :param values: [номер_строки, сумма]
+        """
+        # TODO -
+        row = table._rows[values[0] - 1]
+        summa = values[1]
+        # print(row)  # [0, <NamesCashItem: 1>, 3000, 3000, 1000, 'A']
+        row[5] = ""
+
+
+
+    def _flow_set(self, table, values):
+        """Перекидывает деньги со строки values[0] суммой values[1] на указанные статьи
+
+        :param table: таблица распределения
+        :param values: [номер_строки, сумма]
+        """
+        # TODO -
+
+    def _commit(self, table):
+        """Принимает распределение к статьям
+
+        :param table: таблица распределения
+        """
+        # TODO -
+
+    @staticmethod
+    def _make_table(balance):
+        """Выводит таблицу распределения"""
+
+        table_show = PrettyTable()
+        table_show.field_names = ["№", "Статья", "План", "Требуется", "Сумма распр.", "Автораспр."]
+        total_plan, total_balance_plan, total_share = 0, 0, 0
+        idx = 0
+        for cashitem, values in balance.items():
+            idx += 1
+            row = [idx, cashitem, values['plan'], values['balance_plan'], values['share'], "A"]
+            table_show.add_row(row)
+
+            total_plan += values['plan']
+            total_balance_plan += values['balance_plan']
+            total_share += values['share']
+        row = ["---"] * 6
+        table_show.add_row(row)
+        table_show.align[table_show.field_names[1]] = "l"
+        return table_show
 
     @staticmethod
     def _get_user_select(items, extend=None):

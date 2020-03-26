@@ -21,6 +21,9 @@ class NamesCashItem(BaseTable):
         verbose_name_plural = u"Названия статей статей"
         database = database
 
+    def __str__(self):
+        return self.name
+
 
 class CashItem(BaseTable):
     name = peewee.ForeignKeyField(NamesCashItem)
@@ -252,7 +255,7 @@ class ManagerCashItems:
         """Предлагает распеределение суммы между статьями
 
         :param summa: сумма к распределению
-        :return {cashitem_name: value, ...}
+        :return {cashitem_name: {plan, balance_plan, share}, ...}
         """
         self.update()
         value, plan_value, virtual_value = self.get_total()
@@ -264,13 +267,17 @@ class ManagerCashItems:
             _koeff = (cashitem.plan_value - cashitem.value) // balance_plan
             _share = round(summa * _koeff)
             if cashitem not in values:
-                values[cashitem.name] = _share
+                values[cashitem.name] = dict(
+                    plan=cashitem.plan_value,
+                    balance_plan=cashitem.plan_value - cashitem.value,
+                    share=_share
+                )
             else:
-                values[cashitem.name] += _share
+                values[cashitem.name]['share'] += _share
             accum += _share
         else:
             if len(self.cash_items):
-                values[self.cash_items[-1].name] += summa - accum
+                values[self.cash_items[-1].name]['share'] += summa - accum
 
         return values
 
