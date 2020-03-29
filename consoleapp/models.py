@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 import peewee
 
-
 database = peewee.SqliteDatabase("test.sqlite3")
 
 
@@ -41,6 +40,7 @@ class CashItem(BaseTable):
 
 database.connect()
 database.create_tables([NamesCashItem, CashItem])
+
 
 #
 # class NamesCashItem:
@@ -98,7 +98,8 @@ class ManagerCashItems:
         :param name_item: название статьи (строка)
         :param plan: планируемая сумма на период
         """
-        number_months = 12*(self.date_end.year-self.date_begin.year)+(self.date_end.month-self.date_begin.month)+1
+        number_months = 12 * (self.date_end.year - self.date_begin.year) + (
+                    self.date_end.month - self.date_begin.month) + 1
         plan_item = math.ceil(plan / number_months)
         for delta in range(number_months):
             month = self.date_begin.month + delta
@@ -251,7 +252,7 @@ class ManagerCashItems:
         cashitem.min_value += summa
         cashitem.value -= summa
 
-    def distribute_money(self, summa):
+    def offer_to_distribute_money(self, summa):
         """Предлагает распеределение суммы между статьями
 
         :param summa: сумма к распределению
@@ -264,7 +265,7 @@ class ManagerCashItems:
         accum = 0
         values = {}
         for cashitem in self.cash_items:
-            _koeff = (cashitem.plan_value - cashitem.value) // balance_plan
+            _koeff = (cashitem.plan_value - cashitem.value) / balance_plan
             _share = round(summa * _koeff)
             if cashitem not in values:
                 values[cashitem.name] = dict(
@@ -280,6 +281,28 @@ class ManagerCashItems:
                 values[self.cash_items[-1].name]['share'] += summa - accum
 
         return values
+
+    def distribute_money(self, cashitem_name, summa):
+        """Распределяет сумму по статьям с указанным именем за период
+
+        :param cashitem_name: имя статьи
+        :param summa: сумма распределения
+        """
+
+        cashitems = list(CashItem.select().where(
+            CashItem.date.between(self.date_begin, self.date_end) & (CashItem.name == cashitem_name)))
+        if len(cashitems) == 0:
+            print("!!! Распределить не удалось")
+            return
+
+        share = summa // len(cashitems)
+        accum = 0
+        for cashitem in cashitems:
+            cashitem.value += share
+            accum += share
+
+        if accum < summa:
+            cashitems[0].value += summa - accum
 
     def update(self):
         """Обновить состав статей"""

@@ -12,6 +12,12 @@ PATTERN_DATE = r'(0?[1-9]|1[0-2]).\d{4}'
 DATE_FORMAT = f'^{PATTERN_DATE}$'
 PERIOD_FORMAT = f'^{PATTERN_DATE} {PATTERN_DATE}$'
 
+LITER_AUTO = 'A'
+
+COMMENT_UNDER_TABLE_FOLOW = ("[y(д) - commit], [n(н) - cancel], [cashitem summa [other_cashitem(s)]]\n"
+            + "1 1000 - оставить на статье №1 сумму 1000 из поступления, остальное распределить по статьям А\n"
+            + "1 2000 3 - оставить на статье №1 сумму 2000, остальное распределить на статью №3\n"
+            + "1 3000 2 4 - оставить на статье №1 сумму 3000, остальное распределить на статьи №2 и №4")
 
 manager = ManagerCashItems()
 
@@ -111,17 +117,13 @@ class HomeAccountConsole:
                 user_summa = input(PREF)
 
             summa = int(user_summa)
-            balance = manager.distribute_money(summa)
+            balance = manager.offer_to_distribute_money(summa)
             table = self._make_table(balance)
             print(table)
-            print("[y(д) - commit], [n(н) - cancel], [cashitem summa [other_cashitem(s)]]")
-            print("1 1000 - оставить на статье №1 сумму 1000 из поступления, остальное распределить по статьям А")
-            print("1 2000 3 - оставить на статье №1 сумму 2000, остальное распределить на статью №3")
-            print("1 3000 2 4 - оставить на статье №1 сумму 3000, остальное распределить на статьи №2 и №4")
-
+            print(COMMENT_UNDER_TABLE_FOLOW)
             commit = self._user_input_distribute_money(table)
             if commit:
-                self._commit(balance)
+                self._commit(table)
 
     def _user_input_distribute_money(self, table):
         """Работа пользователя с таблицей распределения"""
@@ -142,6 +144,11 @@ class HomeAccountConsole:
                 self._flow_to_other(table, input_values)
             if len(input_values) > 2:
                 self._flow_set(table, input_values)
+            else:
+                continue
+
+            print(table)
+            print(COMMENT_UNDER_TABLE_FOLOW)
         return commit
 
     def _flow_to_other(self, table: PrettyTable, values):
@@ -150,28 +157,68 @@ class HomeAccountConsole:
         :param table: таблица распределения
         :param values: [номер_строки, сумма]
         """
-        # TODO -
-        row = table._rows[values[0] - 1]
-        summa = values[1]
-        # print(row)  # [0, <NamesCashItem: 1>, 3000, 3000, 1000, 'A']
-        row[5] = ""
 
-
+        rows2 = []
+        total_balance_plan = 0
+        for row2 in table._rows:
+            if row2[5] == LITER_AUTO and row2[3] > 0:
+                rows2.append(row2)
+                total_balance_plan += row2[3]
+        self._folow_pattern(table=table, values=values, rows2=rows2, total_balance_plan=total_balance_plan)
 
     def _flow_set(self, table, values):
         """Перекидывает деньги со строки values[0] суммой values[1] на указанные статьи
 
         :param table: таблица распределения
-        :param values: [номер_строки, сумма]
+        :param values: [номер_строки, сумма, ...]
         """
-        # TODO -
 
-    def _commit(self, table):
+        rows2 = []
+        total_balance_plan = 0
+        for idx in values[2:]:
+            if len(table._rows) > idx:
+                print("! Неправильно указана целевая статья")
+                return
+
+            row2 = table._rows[idx - 1]
+            row2[5] = ""
+            rows2.append(row2)
+            total_balance_plan += row2[3]
+        self._folow_pattern(table=table, values=values, rows2=rows2, total_balance_plan=total_balance_plan)
+
+    def _folow_pattern(self, table, values, rows2, total_balance_plan):
+        if len(table._rows) > values[0]:
+            print("! Неправильно указана статья")
+            return
+        row = table._rows[values[0] - 1]
+        summa = values[1]
+        rest_summa = row[4] - summa
+        # print(row)  # [0, <NamesCashItem: 1>, 3000, 3000, 1000, 'A']
+        row[5] = ""
+        row[4] = summa
+
+        if total_balance_plan == 0:
+            print("Сумма распределния нулевая")
+            return
+        accum = 0
+        for row2 in rows2:
+            share = round(row2[3] / total_balance_plan * rest_summa)
+            accum += share
+            row2[4] = share
+        else:
+            if len(rows2):
+                rows2[-1] += rest_summa - accum
+        return
+
+    def _commit(self, table:PrettyTable):
         """Принимает распределение к статьям
 
         :param table: таблица распределения
         """
-        # TODO -
+
+        for row in table._rows:
+            manager.distribute_money(cashitem_name=row[1], summa=row[4])
+
 
     @staticmethod
     def _make_table(balance):
@@ -183,7 +230,7 @@ class HomeAccountConsole:
         idx = 0
         for cashitem, values in balance.items():
             idx += 1
-            row = [idx, cashitem, values['plan'], values['balance_plan'], values['share'], "A"]
+            row = [idx, cashitem, values['plan'], values['balance_plan'], values['share'], LITER_AUTO]
             table_show.add_row(row)
 
             total_plan += values['plan']
