@@ -60,8 +60,8 @@ class HomeAccountConsole:
             if NamesCashItem.select().count() == 0:
                 self.new_cashitem()
 
-            print("\tВыберете статью:")
-            cashitem_names = NamesCashItem.select()
+            print("\tВыберите статью:")
+            cashitem_names = list(NamesCashItem.select())
             for idx, item in enumerate(cashitem_names, 1):
                 print('\t', idx, item.name)
 
@@ -125,6 +125,21 @@ class HomeAccountConsole:
             if commit:
                 self._commit(table)
 
+        if step["function_name"] == "cash items settings":
+            submenu = ["Новая статья"]
+            # TODO - Добавить изменить активность статьи
+            print("\tВыберите действие:")
+            for idx, item in enumerate(submenu, 1):
+                print('\t', idx, item)
+
+            select = self._get_user_select(submenu, extend=['[Выход]'])
+            if select == len(submenu) + 1:
+                step["next_step"] = None
+                return
+
+            if select == 0:
+                self.new_cashitem()
+
     def _user_input_distribute_money(self, table):
         """Работа пользователя с таблицей распределения"""
 
@@ -142,7 +157,7 @@ class HomeAccountConsole:
             input_values = [int(r.group()) for r in parse_line if r.group() and r.group().isdigit()]
             if len(input_values) == 2:
                 self._flow_to_other(table, input_values)
-            if len(input_values) > 2:
+            elif len(input_values) > 2:
                 self._flow_set(table, input_values)
             else:
                 continue
@@ -161,6 +176,9 @@ class HomeAccountConsole:
         rows2 = []
         total_balance_plan = 0
         for row2 in table._rows:
+            if not str(row2[0]).isdigit() or row2[0] == values[0]:
+                continue
+
             if row2[5] == LITER_AUTO and row2[3] > 0:
                 rows2.append(row2)
                 total_balance_plan += row2[3]
@@ -176,7 +194,7 @@ class HomeAccountConsole:
         rows2 = []
         total_balance_plan = 0
         for idx in values[2:]:
-            if len(table._rows) > idx:
+            if len(table._rows) < idx:
                 print("! Неправильно указана целевая статья")
                 return
 
@@ -187,7 +205,7 @@ class HomeAccountConsole:
         self._folow_pattern(table=table, values=values, rows2=rows2, total_balance_plan=total_balance_plan)
 
     def _folow_pattern(self, table, values, rows2, total_balance_plan):
-        if len(table._rows) > values[0]:
+        if len(table._rows) < values[0]:
             print("! Неправильно указана статья")
             return
         row = table._rows[values[0] - 1]
@@ -204,21 +222,22 @@ class HomeAccountConsole:
         for row2 in rows2:
             share = round(row2[3] / total_balance_plan * rest_summa)
             accum += share
-            row2[4] = share
+            row2[4] += share
         else:
             if len(rows2):
-                rows2[-1] += rest_summa - accum
+                rows2[-1][4] += rest_summa - accum
         return
 
-    def _commit(self, table:PrettyTable):
+    def _commit(self, table: PrettyTable):
         """Принимает распределение к статьям
 
         :param table: таблица распределения
         """
 
         for row in table._rows:
+            if not str(row[0]).isdigit():
+                continue
             manager.distribute_money(cashitem_name=row[1], summa=row[4])
-
 
     @staticmethod
     def _make_table(balance):
@@ -237,6 +256,8 @@ class HomeAccountConsole:
             total_balance_plan += values['balance_plan']
             total_share += values['share']
         row = ["---"] * 6
+        table_show.add_row(row)
+        row = ["", "ИТОГО", total_plan, total_balance_plan, total_share, ""]
         table_show.add_row(row)
         table_show.align[table_show.field_names[1]] = "l"
         return table_show

@@ -251,6 +251,7 @@ class ManagerCashItems:
         cashitem = CashItem.get(name=cashitem_name)
         cashitem.min_value += summa
         cashitem.value -= summa
+        cashitem.save()
 
     def offer_to_distribute_money(self, summa):
         """Предлагает распеределение суммы между статьями
@@ -267,13 +268,15 @@ class ManagerCashItems:
         for cashitem in self.cash_items:
             _koeff = (cashitem.plan_value - cashitem.value) / balance_plan
             _share = round(summa * _koeff)
-            if cashitem not in values:
+            if cashitem.name not in values:
                 values[cashitem.name] = dict(
                     plan=cashitem.plan_value,
                     balance_plan=cashitem.plan_value - cashitem.value,
                     share=_share
                 )
             else:
+                values[cashitem.name]['plan'] += cashitem.plan_value
+                values[cashitem.name]['balance_plan'] += cashitem.plan_value - cashitem.value
                 values[cashitem.name]['share'] += _share
             accum += _share
         else:
@@ -292,17 +295,33 @@ class ManagerCashItems:
         cashitems = list(CashItem.select().where(
             CashItem.date.between(self.date_begin, self.date_end) & (CashItem.name == cashitem_name)))
         if len(cashitems) == 0:
-            print("!!! Распределить не удалось")
+            print(f"!!! Распределить по статье {cashitem_name} не удалось")
             return
 
         share = summa // len(cashitems)
         accum = 0
+        delta = 0
         for cashitem in cashitems:
-            cashitem.value += share
-            accum += share
+            _share = share + delta
+            clac_share = max(0, min(_share, cashitem.plan_value - cashitem.value))
+            delta = _share - clac_share
+            cashitem.value += clac_share
+            accum += clac_share
+            cashitem.save()
 
         if accum < summa:
+            share = accum
+            for cashitem in cashitems:
+                if cashitem.plan_value <= cashitem.value:
+                    continue
+                clac_share = max(0, min(share, cashitem.plan_value - cashitem.value))
+                share -= clac_share
+                cashitem.value += clac_share
+                accum += clac_share
+                cashitem.save()
+
             cashitems[0].value += summa - accum
+            cashitems[0].save()
 
     def update(self):
         """Обновить состав статей"""

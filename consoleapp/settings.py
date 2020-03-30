@@ -118,6 +118,7 @@ SCENARIOS = {
         "steps": {
             "step1": {
                 "text": "Настроить статьи",
+                "function_name": "cash items settings",
                 "next_step": None
             }
         }
