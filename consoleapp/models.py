@@ -188,25 +188,28 @@ class ManagerCashItems:
         table = [["№", u"Статья"]]
         table[0].extend(col_dates)
         current_number = 0
-        total_row = [[0, 0]] * len(col_dates)
+        total_row = [[0, 0, 0]] * len(col_dates)
         for row in rows:
             new_row = [row['number'], row['name']]
             for date in col_dates:
-                sub_row = [0, 0]
+                sub_row = [0, 0, 0]
                 if row['date'] == date:
-                    sub_row = [row['plan'], row['value']]
+                    sub_row = [row['plan'], row['value'], row['min_value']]
                 new_row.append(sub_row)
 
             if row['number'] == current_number:
                 recent_row = table[-1]
                 result_row = list(
-                    map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(recent_row[2:], new_row[2:])))
+                    map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1], a[0][2] + a[1][2]],
+                        zip(recent_row[2:], new_row[2:])))
                 table[-1][2:] = result_row
             else:
                 current_number = row['number']
                 table.append(new_row)
 
-            total_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1]], zip(new_row[2:], total_row)))
+            total_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1], a[0][2] + a[1][2]],
+                                 zip(new_row[2:], total_row)))
+
         split_line = ["---"] * (len(col_dates) + 2)
         table.append(split_line)
         total = ["", "ИТОГО"]
@@ -235,7 +238,8 @@ class ManagerCashItems:
                 name=cashitem.name.name,
                 date=cashitem.date,
                 plan=cashitem.plan_value,
-                value=cashitem.value + cashitem.virtual_value
+                value=cashitem.value + cashitem.virtual_value,
+                min_value=cashitem.min_value
             )
             rows.append(row)
         col_dates.sort()

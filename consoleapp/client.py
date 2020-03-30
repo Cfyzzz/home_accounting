@@ -77,8 +77,12 @@ class HomeAccountConsole:
             table_show = PrettyTable()
             table_show.field_names = table[0]
             for row in table[1:]:
-                table_show.add_row(row)
+                _row = row[:2]
+                for r in row[2:]:
+                    _row.append(f"{r[0]}/{r[1]} {r[2]}")
+                table_show.add_row(_row)
             print(table_show)
+            print("* Расшифровка: [план/накоплено списано]")
 
         if step["function_name"] == "set summa":
             print("\tУкажите общую сумму на заданный период по статье")
