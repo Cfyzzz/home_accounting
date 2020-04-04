@@ -31,6 +31,7 @@ class CashItem(BaseTable):
     plan_value = peewee.IntegerField(default=0, verbose_name=u"Плановое значение")
     date = peewee.DateField(default=datetime.today(), verbose_name="Период")
     virtual_value = peewee.IntegerField(default=0, verbose_name=u"Плановый приход")
+    active = peewee.BooleanField(default=True)
 
     class Meta:
         verbose_name = u"статья"
@@ -330,6 +331,9 @@ class ManagerCashItems:
     def update(self):
         """Обновить состав статей"""
         self.cash_items = list(CashItem.select().where(CashItem.date.between(self.date_begin, self.date_end)))
+
+    def get_all_cashitems(self):
+        return list(NamesCashItem.select())
 
     class Mets:
         verbose_name = u"менеджер планирования"

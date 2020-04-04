@@ -62,6 +62,11 @@ SCENARIOS = {
             "step3": {
                 "text": "Указать сумму",
                 "function_name": "write-off summa",
+                "next_step": "step4"
+            },
+            "step4": {
+                "text": "Просмотр",
+                "function_name": "view period",
                 "next_step": None
             }
         }

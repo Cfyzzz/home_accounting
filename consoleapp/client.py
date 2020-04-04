@@ -132,17 +132,29 @@ class HomeAccountConsole:
         if step["function_name"] == "cash items settings":
             submenu = ["Новая статья"]
             # TODO - Добавить изменить активность статьи
-            print("\tВыберите действие:")
-            for idx, item in enumerate(submenu, 1):
-                print('\t', idx, item)
+            # TODO - Добавить Переименовать статью
+            # TODO - Скопировать статьи на следующий период (копируется план и указанные статьи)
+            # TODO - Выбрать статью и указать что будем корректировать: план или текущее значение
+            while True:
+                print("\tДействующие статьи:")
+                cashitems_names = manager.get_all_cashitems()
+                if len(cashitems_names) == 0:
+                    print("\t-- Нет статей --")
+                else:
+                    for name in cashitems_names:
+                        print(f"\t   {name}")
+                print()
+                print("\tВыберите действие:")
+                for idx, item in enumerate(submenu, 1):
+                    print('\t', idx, item)
 
-            select = self._get_user_select(submenu, extend=['[Выход]'])
-            if select == len(submenu) + 1:
-                step["next_step"] = None
-                return
+                select = self._get_user_select(submenu, extend=['[Выход]'])
+                if select == len(submenu):
+                    step["next_step"] = None
+                    return
 
-            if select == 0:
-                self.new_cashitem()
+                if select == 0:
+                    self.new_cashitem()
 
     def _user_input_distribute_money(self, table):
         """Работа пользователя с таблицей распределения"""
@@ -303,13 +315,16 @@ class UserState:
 
 
 if __name__ == "__main__":
-    state = UserState()
-    ha = HomeAccountConsole()
-    select = ha.show_menu()
-    scenario_name = settings.MENU[select]["scenario"]
-    state.scenario = settings.SCENARIOS[scenario_name]
-    next_step_name = state.scenario["first_step"]
-    while next_step_name:
-        state.step = state.scenario["steps"][next_step_name]
-        ha.execute_step(state.step)
-        next_step_name = state.step['next_step']
+    while True:
+        # TODO - В главном меню добавить Выход
+        state = UserState()
+        ha = HomeAccountConsole()
+        select = ha.show_menu()
+        scenario_name = settings.MENU[select]["scenario"]
+        state.scenario = settings.SCENARIOS[scenario_name]
+        next_step_name = state.scenario["first_step"]
+        while next_step_name:
+            state.step = state.scenario["steps"][next_step_name]
+            ha.execute_step(state.step)
+            next_step_name = state.step['next_step']
+        print()
