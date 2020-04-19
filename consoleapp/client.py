@@ -317,6 +317,7 @@ class UserState:
 if __name__ == "__main__":
     while True:
         # TODO - В главном меню добавить Выход
+        # TODO - В главное меню добавить Копировать - копирование статей с одного месяца в другой
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()

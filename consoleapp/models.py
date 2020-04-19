@@ -180,6 +180,7 @@ class ManagerCashItems:
         """Возвращает отсортированную таблицу
         [Номер строки, Статья, Дата, План, Текущее значение]
         """
+        self.update()
         col_dates, rows = self._get_rows_from_current_cashitems()
         table = self._get_table_by_format_from_dates_and_rows(col_dates, rows)
         return table
