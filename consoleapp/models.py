@@ -169,12 +169,12 @@ class ManagerCashItems:
     def get_total(self):
         """Получить сводную информацию по периоду
 
-        :return value, plan_value, virtual_value
+        :return value, plan_value, virtual_value, min_value
         """
         self.update()
-        total_info = ((ci.value, ci.plan_value, ci.virtual_value) for ci in self.cash_items)
-        value, plan_value, virtual_value = map(sum, zip(*total_info))
-        return value, plan_value, virtual_value
+        total_info = ((ci.value, ci.plan_value, ci.virtual_value, ci.min_value) for ci in self.cash_items)
+        value, plan_value, virtual_value, min_value = map(sum, zip(*total_info))
+        return value, plan_value, virtual_value, min_value
 
     def get_sorting_rows(self):
         """Возвращает отсортированную таблицу
@@ -266,23 +266,23 @@ class ManagerCashItems:
         :return {cashitem_name: {plan, balance_plan, share}, ...}
         """
         self.update()
-        value, plan_value, virtual_value = self.get_total()
-        balance_plan = plan_value - value
+        value, plan_value, virtual_value, min_value = self.get_total()
+        balance_plan = plan_value - (value + min_value)
         summa = min(summa, balance_plan)
         accum = 0
         values = {}
         for cashitem in self.cash_items:
-            _koeff = (cashitem.plan_value - cashitem.value) / balance_plan
+            _koeff = (cashitem.plan_value - (cashitem.value + cashitem.min_value)) / balance_plan
             _share = round(summa * _koeff)
             if cashitem.name not in values:
                 values[cashitem.name] = dict(
                     plan=cashitem.plan_value,
-                    balance_plan=cashitem.plan_value - cashitem.value,
+                    balance_plan=cashitem.plan_value - (cashitem.value + cashitem.min_value),
                     share=_share
                 )
             else:
                 values[cashitem.name]['plan'] += cashitem.plan_value
-                values[cashitem.name]['balance_plan'] += cashitem.plan_value - cashitem.value
+                values[cashitem.name]['balance_plan'] += cashitem.plan_value - (cashitem.value + cashitem.min_value)
                 values[cashitem.name]['share'] += _share
             accum += _share
         else:

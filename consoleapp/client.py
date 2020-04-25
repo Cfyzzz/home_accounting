@@ -229,6 +229,8 @@ class HomeAccountConsole:
         rest_summa = row[4] - summa
         # print(row)  # [0, <NamesCashItem: 1>, 3000, 3000, 1000, 'A']
         row[5] = ""
+
+        # TODO - Надо посчитать Итого Сумма распр. по таблице
         row[4] = summa
 
         if total_balance_plan == 0:
@@ -318,6 +320,7 @@ if __name__ == "__main__":
     while True:
         # TODO - В главном меню добавить Выход
         # TODO - В главное меню добавить Копировать - копирование статей с одного месяца в другой
+        # TODO - Куда списывать излишки суммы распределения
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()
