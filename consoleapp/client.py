@@ -229,21 +229,24 @@ class HomeAccountConsole:
         rest_summa = row[4] - summa
         # print(row)  # [0, <NamesCashItem: 1>, 3000, 3000, 1000, 'A']
         row[5] = ""
-
-        # TODO - Надо посчитать Итого Сумма распр. по таблице
         row[4] = summa
 
         if total_balance_plan == 0:
             print("Сумма распределния нулевая")
-            return
-        accum = 0
-        for row2 in rows2:
-            share = round(row2[3] / total_balance_plan * rest_summa)
-            accum += share
-            row2[4] += share
         else:
-            if len(rows2):
-                rows2[-1][4] += rest_summa - accum
+            accum = 0
+            for row2 in rows2:
+                share = round(row2[3] / total_balance_plan * rest_summa)
+                accum += share
+                row2[4] += share
+            else:
+                if len(rows2):
+                    rows2[-1][4] += rest_summa - accum
+
+        total_share = 0
+        for row in table._rows[:-2]:
+            total_share += row[4]
+        table._rows[-1][4] = total_share
         return
 
     def _commit(self, table: PrettyTable):
