@@ -39,22 +39,7 @@ class HomeAccountConsole:
         print(step["text"])
         print('-' * len(step["text"]))
         if step["function_name"] == "select period":
-            print("\tУкажите период в формате:\n\tmm.yyyy mm.yyyy (на один месяц нужно указать только одну дату)")
-            user_line = ""
-            while not (re.fullmatch(PERIOD_FORMAT, user_line)
-                       or re.fullmatch(DATE_FORMAT, user_line)):
-                user_line = input(PREF)
-
-            dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
-            if len(dates) == 1:
-                dates = dates*2
-
-            if dates[0] > dates[1]:
-                dates.reverse()
-
-            self.period = dates
-            manager.set_period_manager(*self.period)
-            return
+            self.select_period()
 
         if step["function_name"] == "select cashitem":
             if NamesCashItem.select().count() == 0:
@@ -73,88 +58,124 @@ class HomeAccountConsole:
             self.current_cashitem_name = cashitem_names[select]
 
         if step["function_name"] == "view period":
-            table = manager.get_sorting_rows()
-            table_show = PrettyTable()
-            table_show.field_names = table[0]
-            for row in table[1:]:
-                _row = row[:2]
-                for r in row[2:]:
-                    _row.append(f"{r[0]}/{r[1]} {r[2]}")
-                table_show.add_row(_row)
-            print(table_show)
-            print("* Расшифровка: [план/накоплено списано]")
+            self.view_period()
 
         if step["function_name"] == "set summa":
-            print("\tУкажите общую сумму на заданный период по статье")
-            user_summa = ""
-            while not user_summa.isdigit():
-                user_summa = input(PREF)
-
-            summa = int(user_summa)
-            manager.planning(self.current_cashitem_name, summa)
+            self.set_summa()
 
         if step["function_name"] == "select month":
-            print("\tУкажите месяц в формате mm.yyyy")
-            user_line = ""
-            while not re.fullmatch(DATE_FORMAT, user_line):
-                user_line = input(PREF)
-
-            dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
-            dates = dates * 2
-            self.period = dates
-            manager.set_period_manager(*self.period)
-            return
+            self.select_month()
 
         if step["function_name"] == "write-off summa":
-            print("\tУкажите сумму списания")
-            user_summa = ""
-            while not user_summa.isdigit():
-                user_summa = input(PREF)
-
-            summa = int(user_summa)
-            manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
+            self.writeoff_summa()
 
         if step["function_name"] == "distribute money":
-            # print("\tУкажите сумму распределения")
-            user_summa = ""
-            while not user_summa.isdigit():
-                user_summa = input(PREF)
-
-            summa = int(user_summa)
-            balance = manager.offer_to_distribute_money(summa)
-            table = self._make_table(balance)
-            print(table)
-            print(COMMENT_UNDER_TABLE_FOLOW)
-            commit = self._user_input_distribute_money(table)
-            if commit:
-                self._commit(table)
+            self.distribute_money()
 
         if step["function_name"] == "cash items settings":
-            submenu = ["Новая статья"]
-            # TODO - Добавить изменить активность статьи
-            # TODO - Добавить Переименовать статью
-            # TODO - Скопировать статьи на следующий период (копируется план и указанные статьи)
-            # TODO - Выбрать статью и указать что будем корректировать: план или текущее значение
-            while True:
-                print("\tДействующие статьи:")
-                cashitems_names = manager.get_all_cashitems()
-                if len(cashitems_names) == 0:
-                    print("\t-- Нет статей --")
-                else:
-                    for name in cashitems_names:
-                        print(f"\t   {name}")
-                print()
-                print("\tВыберите действие:")
-                for idx, item in enumerate(submenu, 1):
-                    print('\t', idx, item)
+            self.cash_items_settings(step)
 
-                select = self._get_user_select(submenu, extend=['[Выход]'])
-                if select == len(submenu):
-                    step["next_step"] = None
-                    return
+        if step["function_name"] == "select new month":
+            # TODO -
+            pass
 
-                if select == 0:
-                    self.new_cashitem()
+        if step["function_name"] == "copy items":
+            # TODO -
+            pass
+
+    # section Scenario
+    def cash_items_settings(self, step):
+        submenu = ["Новая статья"]
+        # TODO - Добавить изменить активность статьи
+        # TODO - Добавить Переименовать статью
+        # TODO - Скопировать статьи на следующий период (копируется план и указанные статьи)
+        # TODO - Выбрать статью и указать что будем корректировать: план или текущее значение
+        while True:
+            print("\tДействующие статьи:")
+            cashitems_names = manager.get_all_cashitems()
+            if len(cashitems_names) == 0:
+                print("\t-- Нет статей --")
+            else:
+                for name in cashitems_names:
+                    print(f"\t   {name}")
+            print()
+            print("\tВыберите действие:")
+            for idx, item in enumerate(submenu, 1):
+                print('\t', idx, item)
+
+            select = self._get_user_select(submenu, extend=['[Выход]'])
+            if select == len(submenu):
+                step["next_step"] = None
+                return
+
+            if select == 0:
+                self.new_cashitem()
+
+    def distribute_money(self):
+        user_summa = ""
+        while not user_summa.isdigit():
+            user_summa = input(PREF)
+        summa = int(user_summa)
+        balance = manager.offer_to_distribute_money(summa)
+        table = self._make_table(balance)
+        print(table)
+        print(COMMENT_UNDER_TABLE_FOLOW)
+        commit = self._user_input_distribute_money(table)
+        if commit:
+            self._commit(table)
+
+    def writeoff_summa(self):
+        print("\tУкажите сумму списания")
+        user_summa = ""
+        while not user_summa.isdigit():
+            user_summa = input(PREF)
+        summa = int(user_summa)
+        manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
+
+    def select_month(self):
+        print("\tУкажите месяц в формате mm.yyyy")
+        user_line = ""
+        while not re.fullmatch(DATE_FORMAT, user_line):
+            user_line = input(PREF)
+        dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
+        dates = dates * 2
+        self.period = dates
+        manager.set_period_manager(*self.period)
+
+    def set_summa(self):
+        print("\tУкажите общую сумму на заданный период по статье")
+        user_summa = ""
+        while not user_summa.isdigit():
+            user_summa = input(PREF)
+        summa = int(user_summa)
+        manager.planning(self.current_cashitem_name, summa)
+
+    def view_period(self):
+        table = manager.get_sorting_rows()
+        table_show = PrettyTable()
+        table_show.field_names = table[0]
+        for row in table[1:]:
+            _row = row[:2]
+            for r in row[2:]:
+                _row.append(f"{r[0]}/{r[1]} {r[2]}")
+            table_show.add_row(_row)
+        print(table_show)
+        print("* Расшифровка: [план/накоплено списано]")
+
+    def select_period(self):
+        print("\tУкажите период в формате:\n\tmm.yyyy mm.yyyy (на один месяц нужно указать только одну дату)")
+        user_line = ""
+        while not (re.fullmatch(PERIOD_FORMAT, user_line)
+                   or re.fullmatch(DATE_FORMAT, user_line)):
+            user_line = input(PREF)
+        dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
+        if len(dates) == 1:
+            dates = dates * 2
+        if dates[0] > dates[1]:
+            dates.reverse()
+        self.period = dates
+        manager.set_period_manager(*self.period)
+    # endsection Scenario
 
     def _user_input_distribute_money(self, table):
         """Работа пользователя с таблицей распределения"""
