@@ -254,7 +254,7 @@ class ManagerCashItems:
         :param summa: сумма списания
         :param cashitem_name: статья списания
         """
-        cashitem = CashItem.get(name=cashitem_name)
+        cashitem = CashItem.get(name=cashitem_name, date=self.date_begin)
         cashitem.min_value += summa
         cashitem.value -= summa
         cashitem.save()
