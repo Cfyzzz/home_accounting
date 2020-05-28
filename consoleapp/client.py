@@ -164,11 +164,15 @@ class HomeAccountConsole:
         print("* Расшифровка: [план/накоплено списано]")
 
     def select_period(self):
-        print("\tУкажите период в формате:\n\tmm.yyyy mm.yyyy (на один месяц нужно указать только одну дату)")
+        print("\tУкажите период в формате:\n\tmm.yyyy mm.yyyy (на один месяц нужно указать только одну дату или . "
+              "(текущий месяц))")
         user_line = ""
         while not (re.fullmatch(PERIOD_FORMAT, user_line)
-                   or re.fullmatch(DATE_FORMAT, user_line)):
+                   or re.fullmatch(DATE_FORMAT, user_line)
+                   or user_line == "."):
             user_line = input(PREF)
+        if user_line == ".":
+            user_line = datetime.today().strftime('%m.%Y')
         dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
         if len(dates) == 1:
             dates = dates * 2
