@@ -34,7 +34,7 @@ class HomeAccountConsole:
         for idx, item in enumerate(settings.MENU, 1):
             print('\t', idx, item["name"])
 
-        return self._get_user_select(settings.MENU)
+        return self._get_user_select(settings.MENU, ['Выход'])
 
     def execute_step(self, step):
         print(step["text"])
@@ -347,12 +347,14 @@ class UserState:
 
 if __name__ == "__main__":
     while True:
-        # TODO - В главном меню добавить Выход
         # TODO - В главное меню добавить Копировать - копирование статей с одного месяца в другой
         # TODO - Куда списывать излишки суммы распределения
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()
+        if select == len(settings.MENU):
+            break
+
         scenario_name = settings.MENU[select]["scenario"]
         state.scenario = settings.SCENARIOS[scenario_name]
         next_step_name = state.scenario["first_step"]
@@ -361,3 +363,4 @@ if __name__ == "__main__":
             ha.execute_step(state.step)
             next_step_name = state.step['next_step']
         print()
+    print("Goodbye!")
