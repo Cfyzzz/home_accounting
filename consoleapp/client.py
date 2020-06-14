@@ -6,7 +6,6 @@ import re
 from models import CashItem, ManagerCashItems, NamesCashItem
 from prettytable import PrettyTable
 
-
 PREF = "# "
 PATTERN_DATE = r'(0?[1-9]|1[0-2]).\d{4}'
 DATE_FORMAT = f'^{PATTERN_DATE}$'
@@ -15,10 +14,10 @@ PERIOD_FORMAT = f'^{PATTERN_DATE} {PATTERN_DATE}$'
 LITER_AUTO = 'A'
 
 COMMENT_UNDER_TABLE_FOLOW = (
-            "[y(д) - commit], [n(н) - cancel], [cashitem summa [other_cashitem(s)]]\n"
-            "1 1000 - оставить на статье №1 сумму 1000 из поступления, остальное распределить по статьям А\n"
-            "1 2000 3 - оставить на статье №1 сумму 2000, остальное распределить на статью №3\n"
-            "1 3000 2 4 - оставить на статье №1 сумму 3000, остальное распределить на статьи №2 и №4")
+    "[y(д) - commit], [n(н) - cancel], [cashitem summa [other_cashitem(s)]]\n"
+    "1 1000 - оставить на статье №1 сумму 1000 из поступления, остальное распределить по статьям А\n"
+    "1 2000 3 - оставить на статье №1 сумму 2000, остальное распределить на статью №3\n"
+    "1 3000 2 4 - оставить на статье №1 сумму 3000, остальное распределить на статьи №2 и №4")
 
 manager = ManagerCashItems()
 
@@ -134,10 +133,13 @@ class HomeAccountConsole:
         manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
 
     def select_month(self):
-        print("\tУкажите месяц в формате mm.yyyy")
+        print("\tУкажите месяц в формате mm.yyyy или . (текущий месяц)")
         user_line = ""
-        while not re.fullmatch(DATE_FORMAT, user_line):
+        while not (re.fullmatch(DATE_FORMAT, user_line)
+                   or user_line == "."):
             user_line = input(PREF)
+        if user_line == ".":
+            user_line = datetime.today().strftime('%m.%Y')
         dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
         dates = dates * 2
         self.period = dates
@@ -180,6 +182,7 @@ class HomeAccountConsole:
             dates.reverse()
         self.period = dates
         manager.set_period_manager(*self.period)
+
     # endsection Scenario
 
     def _user_input_distribute_money(self, table):
