@@ -226,9 +226,11 @@ class ManagerCashItems:
         col_dates = []
         for cashitem in self.cash_items:
             name = cashitem.name.name
-            # if not name in row_numbers:
-            current_number += 1
-            row_numbers[name] = current_number
+            if not name in row_numbers:
+                # TODO - Нельзя убирать это условие, т.к. при нескольких месяцах статьи не сворачиваются
+                #  но бывают ситуации, что в одном месяце два раза одна статья (07.2020)
+                current_number += 1
+                row_numbers[name] = current_number
 
             date = cashitem.date
             if not date in col_dates:
