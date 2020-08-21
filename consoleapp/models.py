@@ -226,9 +226,9 @@ class ManagerCashItems:
         col_dates = []
         for cashitem in self.cash_items:
             name = cashitem.name.name
-            if not name in row_numbers:
-                current_number += 1
-                row_numbers[name] = current_number
+            # if not name in row_numbers:
+            current_number += 1
+            row_numbers[name] = current_number
 
             date = cashitem.date
             if not date in col_dates:
