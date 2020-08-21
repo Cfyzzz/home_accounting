@@ -15,18 +15,22 @@ MENU = [
         "name": "Просмотр",
         "scenario": "review"
     },
+    # {
+    #     "name": "Редактирование",
+    #     "scenario": "edit"
+    # },
     {
-        "name": "Редактирование",
-        "scenario": "edit"
+        "name": "Перенос остатков между статьями",
+        "scenario": "carryover of residues",
     },
     {
         "name": "Настройка статей",
         "scenario": "setting"
     },
-    {
-        "name": "Копирование предыдущего периода",
-        "scenario": "copy previous period"
-    }
+    # {
+    #     "name": "Копирование предыдущего периода",
+    #     "scenario": "copy previous period"
+    # }
 ]
 
 SCENARIOS = {
@@ -90,23 +94,43 @@ SCENARIOS = {
             }
         }
     },
-    "edit": {
+    "carryover of residues": {
         "first_step": "step1",
         "steps": {
             "step1": {
-                "text": "Выбрать период",
+                "text": "Выбрать месяц",
+                "function_name": "select month",
                 "next_step": "step2"
             },
             "step2": {
-                "text": "Выбрать статью",
+                "text": "Просмотр",
+                "function_name": "view period",
                 "next_step": "step3"
             },
             "step3": {
-                "text": "Указать сумму",
+                "text": "Перенос суммы между статьями",
+                "function_name": "carryover of residues",
                 "next_step": None
-            }
-        }
+            },
+        },
     },
+    # "edit": {
+    #     "first_step": "step1",
+    #     "steps": {
+    #         "step1": {
+    #             "text": "Выбрать период",
+    #             "next_step": "step2"
+    #         },
+    #         "step2": {
+    #             "text": "Выбрать статью",
+    #             "next_step": "step3"
+    #         },
+    #         "step3": {
+    #             "text": "Указать сумму",
+    #             "next_step": None
+    #         }
+    #     }
+    # },
     "review": {
         "first_step": "step1",
         "steps": {
@@ -132,24 +156,24 @@ SCENARIOS = {
             }
         }
     },
-    "copy previous period": {
-        "first_step": "step1",
-        "steps": {
-            "step1": {
-                "text": "Выбрать месяц-образец",
-                "function_name": "select month",
-                "next_step": "step2"
-            },
-            "step2": {
-                "text": "Выбрать новый месяц",
-                "function_name": "select new month",
-                "next_step": "step3"
-            },
-            "step3": {
-                "text": "Копировать статьи",
-                "function_name": "copy items",
-                "next_step": None
-            }
-        }
-    }
+    # "copy previous period": {
+    #     "first_step": "step1",
+    #     "steps": {
+    #         "step1": {
+    #             "text": "Выбрать месяц-образец",
+    #             "function_name": "select month",
+    #             "next_step": "step2"
+    #         },
+    #         "step2": {
+    #             "text": "Выбрать новый месяц",
+    #             "function_name": "select new month",
+    #             "next_step": "step3"
+    #         },
+    #         "step3": {
+    #             "text": "Копировать статьи",
+    #             "function_name": "copy items",
+    #             "next_step": None
+    #         }
+    #     }
+    # }
 }

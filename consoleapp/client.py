@@ -75,6 +75,9 @@ class HomeAccountConsole:
         if step["function_name"] == "cash items settings":
             self.cash_items_settings(step)
 
+        if step["function_name"] == "carryover of residues":
+            self.carryover_of_residues()
+
         if step["function_name"] == "select new month":
             # TODO -
             pass
@@ -182,6 +185,36 @@ class HomeAccountConsole:
             dates.reverse()
         self.period = dates
         manager.set_period_manager(*self.period)
+
+    def carryover_of_residues(self):
+        """Перенос суммы между статьями в предлеах одного периода
+
+        Предварительно должен быть указан период"""
+
+        instruction = (
+            "Укажите статьи списания, прихода и сумму\n"
+            "[[0 - выход], [1 - вывести таблицу], [cashitem other_cashitem summa]]\n"            
+            "Пример, 1 2 2000 - перенести сумму 2000 со статьи №1 на статью №2")
+        print(instruction)
+
+        is_exit = False
+        while not is_exit:
+            user_line = input(PREF)
+            if user_line == "0":
+                is_exit = True
+            elif user_line == "1":
+                self.view_period()
+                print(instruction)
+
+            parse_line = re.finditer(r"\d*", user_line)
+            input_values = [int(r.group()) for r in parse_line if r.group() and r.group().isdigit()]
+            if len(input_values) == 3:
+                summa = int(input_values[2])
+                source_cashitem = manager.cash_items[int(input_values[0]) - 1]
+                dest_cashitem = manager.cash_items[int(input_values[1]) - 1]
+                manager.writeoff(summa=summa, cashitem_name=source_cashitem.name)
+                manager.writeoff(summa=-summa, cashitem_name=dest_cashitem.name)
+                print(f"Списано из \"{source_cashitem.name}\" на \"{dest_cashitem.name}\" сумма {summa}")
 
     # endsection Scenario
 
@@ -352,6 +385,8 @@ if __name__ == "__main__":
     while True:
         # TODO - В главное меню добавить Копировать - копирование статей с одного месяца в другой
         # TODO - Куда списывать излишки суммы распределения
+        # TODO - Показывать итоги накопленного в окне просмотра
+        # TODO - Писать лог операций
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()
