@@ -115,6 +115,7 @@ class HomeAccountConsole:
                 self.new_cashitem()
 
     def distribute_money(self):
+        # TODO - Не работает полное распределение на конкретные статьи (Например 6 15000 5)
         user_summa = ""
         while not user_summa.isdigit():
             user_summa = input(PREF)
@@ -212,8 +213,7 @@ class HomeAccountConsole:
                 summa = int(input_values[2])
                 source_cashitem = manager.cash_items[int(input_values[0]) - 1]
                 dest_cashitem = manager.cash_items[int(input_values[1]) - 1]
-                manager.writeoff(summa=summa, cashitem_name=source_cashitem.name)
-                manager.writeoff(summa=-summa, cashitem_name=dest_cashitem.name)
+                manager.move(source_cashitem, dest_cashitem, summa)
                 print(f"Списано из \"{source_cashitem.name}\" на \"{dest_cashitem.name}\" сумма {summa}")
 
     # endsection Scenario
