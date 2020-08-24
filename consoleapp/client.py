@@ -384,7 +384,6 @@ class UserState:
 if __name__ == "__main__":
     while True:
         # TODO - Куда списывать излишки суммы распределения
-        # TODO - Показывать итоги накопленного в окне просмотра
         # TODO - Писать лог операций
         state = UserState()
         ha = HomeAccountConsole()

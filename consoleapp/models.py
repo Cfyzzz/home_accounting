@@ -190,15 +190,19 @@ class ManagerCashItems:
         table = [["№", u"Статья"]]
         table[0].extend(col_dates)
         current_number = 0
-        total_row = [[0, 0, 0]] * len(col_dates)
+        total_row = [[0, 0, 0] for _ in range(len(col_dates) + 1)]
+        table[0].append(u"Всего")
         for row in rows:
             new_row = [row['number'], row['name']]
+            sum_row = [0, 0, 0]
             for date in col_dates:
                 sub_row = [0, 0, 0]
                 if row['date'] == date:
                     sub_row = [row['plan'], row['value'], row['min_value']]
                 new_row.append(sub_row)
+                sum_row = list(map(sum, zip(sub_row, sum_row)))
 
+            new_row.append(sum_row)
             if row['number'] == current_number:
                 recent_row = table[-1]
                 result_row = list(
@@ -212,7 +216,7 @@ class ManagerCashItems:
             total_row = list(map(lambda a: [a[0][0] + a[1][0], a[0][1] + a[1][1], a[0][2] + a[1][2]],
                                  zip(new_row[2:], total_row)))
 
-        split_line = ["---"] * (len(col_dates) + 2)
+        split_line = ["---"] * (len(col_dates) + 3)
         table.append(split_line)
         total = ["", "ИТОГО"]
         total.extend(total_row)
@@ -227,8 +231,6 @@ class ManagerCashItems:
         for cashitem in self.cash_items:
             name = cashitem.name.name
             if not name in row_numbers:
-                # TODO - Нельзя убирать это условие, т.к. при нескольких месяцах статьи не сворачиваются
-                #  но бывают ситуации, что в одном месяце два раза одна статья (07.2020)
                 current_number += 1
                 row_numbers[name] = current_number
 
