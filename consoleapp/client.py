@@ -90,10 +90,10 @@ class HomeAccountConsole:
     # section Scenario
     def cash_items_settings(self, step):
         submenu = ["Новая статья"]
-        # TODO - Добавить изменить активность статьи
-        # TODO - Добавить Переименовать статью
-        # TODO - Скопировать статьи на следующий период (копируется план и указанные статьи)
-        # TODO - Выбрать статью и указать что будем корректировать: план или текущее значение
+        # TODO - Добавить изменить активность статьи (неважно)
+        # TODO - Добавить Переименовать статью (важно)
+        # TODO - Скопировать статьи на следующий период (копируется план и указанные статьи) (неважно)
+        # TODO - Выбрать статью и указать что будем корректировать: план или текущее значение (неважно)
         while True:
             print("\tДействующие статьи:")
             cashitems_names = manager.get_all_cashitems()
@@ -116,7 +116,7 @@ class HomeAccountConsole:
                 self.new_cashitem()
 
     def distribute_money(self):
-        # TODO - Не работает полное распределение на конкретные статьи (Например 6 15000 5)
+        # TODO - Не работает полное распределение на конкретные статьи (Например 6 15000 5) (важно)
         user_summa = ""
         while not user_summa.isdigit():
             user_summa = input(PREF)
@@ -384,7 +384,7 @@ class UserState:
 
 if __name__ == "__main__":
     while True:
-        # TODO - Куда списывать излишки суммы распределения
+        # TODO - Куда списывать излишки суммы распределения (неважно)
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()
