@@ -264,11 +264,12 @@ class ManagerCashItems:
         cashitem.save()
 
     def move(self, source_cashitem_name, dest_cashitem_name, summa):
+        print(source_cashitem_name, dest_cashitem_name)
         source_cashitem = CashItem.get(name=source_cashitem_name, date=self.date_begin)
         source_cashitem.value -= summa
         source_cashitem.save()
         dest_cashitem = CashItem.get(name=dest_cashitem_name, date=self.date_begin)
-        dest_cashitem.value = summa
+        dest_cashitem.value += summa
         dest_cashitem.save()
 
     def offer_to_distribute_money(self, summa):

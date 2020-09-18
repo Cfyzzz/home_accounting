@@ -211,8 +211,8 @@ class HomeAccountConsole:
             input_values = [int(r.group()) for r in parse_line if r.group() and r.group().isdigit()]
             if len(input_values) == 3:
                 summa = int(input_values[2])
-                source_cashitem = manager.cash_items[int(input_values[0]) - 1]
-                dest_cashitem = manager.cash_items[int(input_values[1]) - 1]
+                source_cashitem = manager.cash_items[int(input_values[0]) - 1].name
+                dest_cashitem = manager.cash_items[int(input_values[1]) - 1].name
                 manager.move(source_cashitem, dest_cashitem, summa)
                 print(f"Списано из \"{source_cashitem.name}\" на \"{dest_cashitem.name}\" сумма {summa}")
 
