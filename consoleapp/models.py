@@ -2,6 +2,8 @@ import math
 from datetime import datetime, timedelta
 
 import peewee
+from consoleapp.settings import log
+
 
 database = peewee.SqliteDatabase("test.sqlite3")
 
@@ -92,6 +94,7 @@ class ManagerCashItems:
         self.date_begin = begin
         self.date_end = end
         self.update()
+        log(f"Установлен период: {begin} - {end}")
 
     def planning(self, name_item, plan):
         """Планирование суммы по статье на установленный период
@@ -129,6 +132,7 @@ class ManagerCashItems:
         row = CashItem(name=name_cashitem, date=date_item)
         row.save()
         self.update()
+        log(f"Запись добавлена в менеджер: {name_cashitem} : {date_item}")
         return row
 
     def remove(self, cash_item):
@@ -136,6 +140,7 @@ class ManagerCashItems:
 
         :param cash_item: удаляемая запись
         """
+        log(f"Удаляю запись из менеджера {cash_item}")
         cash_item.delete()
         self.update()
 
@@ -145,6 +150,7 @@ class ManagerCashItems:
         :param dest_cash_item: запись-приёмник
         :param source_cash_item: запись-источник
         """
+        log(f"Перезаписываю {dest_cash_item} записью {source_cash_item}")
         dest_cash_item.min_value = source_cash_item.min_value
         dest_cash_item.value = source_cash_item.value
         dest_cash_item.plan_value = source_cash_item.plan_value
@@ -258,19 +264,23 @@ class ManagerCashItems:
         :param summa: сумма списания
         :param cashitem_name: статья списания
         """
+        log(f"Списываю средства по статье {cashitem_name} в размере {summa}")
         cashitem = CashItem.get(name=cashitem_name, date=self.date_begin)
         cashitem.min_value += summa
         cashitem.value -= summa
         cashitem.save()
+        log(f"-- теперь на статье {cashitem_name} min_value={cashitem.min_value}, value={cashitem.value}")
 
     def move(self, source_cashitem_name, dest_cashitem_name, summa):
-        print(source_cashitem_name, dest_cashitem_name)
+        log(f"Перемещаю средства со статьи {source_cashitem_name} на статью {dest_cashitem_name} в размере {summa}")
         source_cashitem = CashItem.get(name=source_cashitem_name, date=self.date_begin)
         source_cashitem.value -= summa
         source_cashitem.save()
+        log(f"-- теперь на статье {source_cashitem_name} value={source_cashitem.value}")
         dest_cashitem = CashItem.get(name=dest_cashitem_name, date=self.date_begin)
         dest_cashitem.value += summa
         dest_cashitem.save()
+        log(f"-- теперь на статье {dest_cashitem_name} value={dest_cashitem.value}")
 
     def offer_to_distribute_money(self, summa):
         """Предлагает распеределение суммы между статьями

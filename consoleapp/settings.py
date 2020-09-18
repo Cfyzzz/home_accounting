@@ -1,3 +1,6 @@
+import logging
+
+
 MENU = [
     {
         "name": "Планирование",
@@ -177,3 +180,16 @@ SCENARIOS = {
     #     }
     # }
 }
+
+
+logger = logging.getLogger("home_accounting")
+log_path = 'home_accounting_console.log'
+file_handler = logging.FileHandler(log_path)
+file_handler.setLevel(logging.WARNING)
+file_handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
+
+logger.addHandler(file_handler)
+
+
+def log(message):
+    logger.warning(message)

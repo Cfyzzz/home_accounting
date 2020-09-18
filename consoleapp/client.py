@@ -1,10 +1,10 @@
 from datetime import datetime
+import re
+from prettytable import PrettyTable
 
 import consoleapp.settings as settings
-import re
-
 from models import CashItem, ManagerCashItems, NamesCashItem
-from prettytable import PrettyTable
+
 
 PREF = "# "
 PATTERN_DATE = r'(0?[1-9]|1[0-2]).\d{4}'
@@ -80,6 +80,7 @@ class HomeAccountConsole:
 
         if step["function_name"] == "select new month":
             # TODO -
+
             pass
 
         if step["function_name"] == "copy items":
@@ -384,7 +385,6 @@ class UserState:
 if __name__ == "__main__":
     while True:
         # TODO - Куда списывать излишки суммы распределения
-        # TODO - Писать лог операций
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()
