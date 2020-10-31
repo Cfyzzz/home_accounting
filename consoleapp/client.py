@@ -116,7 +116,6 @@ class HomeAccountConsole:
                 self.new_cashitem()
 
     def distribute_money(self):
-        # TODO - Не работает полное распределение на конкретные статьи (Например 6 15000 5) (важно)
         user_summa = ""
         while not user_summa.isdigit():
             user_summa = input(PREF)

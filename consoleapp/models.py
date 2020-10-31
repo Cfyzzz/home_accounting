@@ -94,7 +94,7 @@ class ManagerCashItems:
         self.date_begin = begin
         self.date_end = end
         self.update()
-        log(f"Установлен период: {begin} - {end}")
+        log(f"Установлен текущий период: {begin} - {end}")
 
     def planning(self, name_item, plan):
         """Планирование суммы по статье на установленный период
