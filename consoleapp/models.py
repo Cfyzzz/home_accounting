@@ -156,7 +156,7 @@ class ManagerCashItems:
                            plan_value=cash_item.plan_value,
                            virtual_value=0)
             row.save()
-            log(f"Скопировал статью {cash_item.name}")
+            log(f"Скопировал статью {cash_item.name}: {cash_item.plan_value}")
 
     def remove(self, cash_item):
         """Удалить запись из менеджера
