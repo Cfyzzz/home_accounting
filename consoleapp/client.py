@@ -22,11 +22,27 @@ COMMENT_UNDER_TABLE_FOLOW = (
 manager = ManagerCashItems()
 
 
+class SomeData:
+
+    def __init__(self):
+        self.data = {}
+
+    def set(self, **kwargs):
+        for key, value in kwargs.items():
+            self.data[key] = value
+
+    def get(self, key: str):
+        if key in self.data:
+            return self.data[key]
+        return None
+
+
 class HomeAccountConsole:
 
     def __init__(self):
         self.period = []
         self.current_cashitem_name = None
+        self.basket = SomeData()
 
     def show_menu(self):
         """Показать меню"""
@@ -79,13 +95,10 @@ class HomeAccountConsole:
             self.carryover_of_residues()
 
         if step["function_name"] == "select new month":
-            # TODO -
-
-            pass
+            self.select_new_month()
 
         if step["function_name"] == "copy items":
-            # TODO -
-            pass
+            self.copy_items()
 
     # section Scenario
     def cash_items_settings(self, step):
@@ -136,7 +149,23 @@ class HomeAccountConsole:
         summa = int(user_summa)
         manager.writeoff(summa=summa, cashitem_name=self.current_cashitem_name)
 
+    def copy_items(self):
+        month = self.basket.get("new_month")
+        if month is None:
+            print("Невозможно скопировать статьи, т.к. целевой месяц не указан")
+            return
+        manager.copy_all(dest_month=month)
+
+    def select_new_month(self):
+        self.basket.set(new_month=self._get_month()[0])
+
     def select_month(self):
+        dates = self._get_month()
+        dates = dates * 2
+        self.period = dates
+        manager.set_period_manager(*self.period)
+
+    def _get_month(self):
         print("\tУкажите месяц в формате mm.yyyy или . (текущий месяц)")
         user_line = ""
         while not (re.fullmatch(DATE_FORMAT, user_line)
@@ -145,9 +174,7 @@ class HomeAccountConsole:
         if user_line == ".":
             user_line = datetime.today().strftime('%m.%Y')
         dates = [datetime.strptime(m.group(), '%m.%Y').date() for m in re.finditer(PATTERN_DATE, user_line)]
-        dates = dates * 2
-        self.period = dates
-        manager.set_period_manager(*self.period)
+        return dates
 
     def set_summa(self):
         print("\tУкажите общую сумму на заданный период по статье")

@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import peewee
 from consoleapp.settings import log
 
-
 database = peewee.SqliteDatabase("test.sqlite3")
 
 
@@ -103,7 +102,7 @@ class ManagerCashItems:
         :param plan: планируемая сумма на период
         """
         number_months = 12 * (self.date_end.year - self.date_begin.year) + (
-                    self.date_end.month - self.date_begin.month) + 1
+                self.date_end.month - self.date_begin.month) + 1
         plan_item = math.ceil(plan / number_months)
         for delta in range(number_months):
             month = self.date_begin.month + delta
@@ -134,6 +133,24 @@ class ManagerCashItems:
         self.update()
         log(f"Запись добавлена в менеджер: {name_cashitem} : {date_item}")
         return row
+
+    def copy_all(self, dest_month):
+        """Копировать статьи текущего периода в новый период
+
+        :param dest_month: новый месяц
+        """
+
+        log(f"Начинаю процесс копирования статей из периода {self.date_begin} в период {dest_month}")
+        self.update()
+        for cash_item in self.cash_items:
+            row = CashItem(name=cash_item.name,
+                           date=dest_month,
+                           min_value=0,
+                           value=0,
+                           plan_value=cash_item.plan_value,
+                           virtual_value=0)
+            row.save()
+            log(f"Скопировал статью {cash_item.name}")
 
     def remove(self, cash_item):
         """Удалить запись из менеджера

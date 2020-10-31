@@ -30,10 +30,10 @@ MENU = [
         "name": "Настройка статей",
         "scenario": "setting"
     },
-    # {
-    #     "name": "Копирование предыдущего периода",
-    #     "scenario": "copy previous period"
-    # }
+    {
+        "name": "Копирование предыдущего периода",
+        "scenario": "copy previous period"
+    }
 ]
 
 SCENARIOS = {
@@ -159,26 +159,26 @@ SCENARIOS = {
             }
         }
     },
-    # "copy previous period": {
-    #     "first_step": "step1",
-    #     "steps": {
-    #         "step1": {
-    #             "text": "Выбрать месяц-образец",
-    #             "function_name": "select month",
-    #             "next_step": "step2"
-    #         },
-    #         "step2": {
-    #             "text": "Выбрать новый месяц",
-    #             "function_name": "select new month",
-    #             "next_step": "step3"
-    #         },
-    #         "step3": {
-    #             "text": "Копировать статьи",
-    #             "function_name": "copy items",
-    #             "next_step": None
-    #         }
-    #     }
-    # }
+    "copy previous period": {
+        "first_step": "step1",
+        "steps": {
+            "step1": {
+                "text": "Выбрать месяц-образец",
+                "function_name": "select month",
+                "next_step": "step2"
+            },
+            "step2": {
+                "text": "Выбрать новый месяц",
+                "function_name": "select new month",
+                "next_step": "step3"
+            },
+            "step3": {
+                "text": "Копировать статьи",
+                "function_name": "copy items",
+                "next_step": None
+            }
+        }
+    }
 }
 
 
