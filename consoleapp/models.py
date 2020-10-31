@@ -113,7 +113,13 @@ class ManagerCashItems:
 
             date_item = datetime(year, month, 1).date()
             data = {'date': date_item, 'plan_value': plan_item, 'name': name_item}
-            CashItem.insert(data).execute()
+
+            row = CashItem.get_or_none(name=name_item, date=self.date_begin)
+            if row is None:
+                CashItem.insert(data).execute()
+            else:
+                row.plan_value = plan_item
+                row.save()
 
     def append(self, name_item, date_item):
         """Добавить запись в менеджер
