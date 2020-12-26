@@ -2,9 +2,10 @@ import math
 from datetime import datetime, timedelta
 
 import peewee
-from consoleapp.settings import log
+from consoleapp.settings import log, DATABASE_NAME
 
-database = peewee.SqliteDatabase("test.sqlite3")
+
+database = peewee.SqliteDatabase(DATABASE_NAME)
 
 
 class BaseTable(peewee.Model):
@@ -381,6 +382,13 @@ class ManagerCashItems:
 
     def get_all_cashitems(self):
         return list(NamesCashItem.select())
+
+    def rename_cashitem(self, cashitem_name, cashitem_name_new):
+        print(type(cashitem_name.name), cashitem_name.name)
+        cash_item_name = NamesCashItem.get(NamesCashItem.name == cashitem_name.name)
+        cash_item_name.name = cashitem_name_new
+        cash_item_name.save()
+        log(f"\tНазвание статьи \"{cashitem_name}\" изменилось на \"{cashitem_name_new}\"")
 
     class Mets:
         verbose_name = u"менеджер планирования"

@@ -181,6 +181,8 @@ SCENARIOS = {
     }
 }
 
+DATABASE_NAME = "test.sqlite3"
+# DATABASE_NAME = "test_probe.sqlite3"
 
 logger = logging.getLogger("home_accounting")
 log_path = 'home_accounting_console.log'

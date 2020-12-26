@@ -3,7 +3,7 @@ import re
 from prettytable import PrettyTable
 
 import consoleapp.settings as settings
-from models import CashItem, ManagerCashItems, NamesCashItem
+from models import ManagerCashItems, NamesCashItem
 
 
 PREF = "# "
@@ -102,10 +102,8 @@ class HomeAccountConsole:
 
     # section Scenario
     def cash_items_settings(self, step):
-        submenu = ["Новая статья"]
+        submenu = ["Новая статья", "Переименовать статью"]
         # TODO - Добавить изменить активность статьи (неважно)
-        # TODO - Добавить Переименовать статью (важно)
-        # TODO - Скопировать статьи на следующий период (копируется план и указанные статьи) (неважно)
         # TODO - Выбрать статью и указать что будем корректировать: план или текущее значение (неважно)
         while True:
             print("\tДействующие статьи:")
@@ -127,6 +125,8 @@ class HomeAccountConsole:
 
             if select == 0:
                 self.new_cashitem()
+            if select == 1:
+                self.rename_cashitem()
 
     def distribute_money(self):
         user_summa = ""
@@ -401,6 +401,32 @@ class HomeAccountConsole:
         row = NamesCashItem(name=user_item_name)
         row.save()
 
+    def rename_cashitem(self):
+        if NamesCashItem.select().count() == 0:
+            self.new_cashitem()
+
+        print("\tВыберите статью:")
+        cashitem_names = manager.get_all_cashitems()
+        for idx, item in enumerate(cashitem_names, 1):
+            print('\t', idx, item.name)
+
+        select = self._get_user_select(cashitem_names, extend=['[Выход]'])
+        if select == len(cashitem_names):
+            return
+
+        current_cashitem_name = cashitem_names[select]
+
+        print(f"\tНапишите новое название статьи {current_cashitem_name}")
+        new_cashitem_name = input(PREF)
+
+        print(f"Изменить имя статьи \"{current_cashitem_name}\" на \"{new_cashitem_name}\"? (1 - да)")
+        user_answer = input(PREF)
+        if user_answer == "1":
+            manager.rename_cashitem(current_cashitem_name, new_cashitem_name)
+            print(f"\tНазвание статьи \"{current_cashitem_name}\" изменилось на \"{new_cashitem_name}\"\n")
+        else:
+            print("Отмена действия\n")
+
 
 class UserState:
     def __init__(self):
@@ -410,7 +436,8 @@ class UserState:
 
 if __name__ == "__main__":
     while True:
-        # TODO - Куда списывать излишки суммы распределения (неважно)
+        # TODO - При списывании по статье подсказывать накопленную сумму. Можно в общем списке при выборе (неважно)
+        # TODO - Неправильно распределяет 4 5000 6
         state = UserState()
         ha = HomeAccountConsole()
         select = ha.show_menu()
