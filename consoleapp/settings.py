@@ -78,7 +78,7 @@ SCENARIOS = {
             "step4": {
                 "text": "Просмотр",
                 "function_name": "view period",
-                "next_step": None
+                "next_step": "step2"
             }
         }
     },
