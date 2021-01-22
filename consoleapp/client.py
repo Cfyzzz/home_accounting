@@ -384,7 +384,7 @@ class HomeAccountConsole:
             user_select = input(PREF)
             max_value = len(items) + len(extend)
             if user_select.isdigit():
-                select = int(user_select[:1]) - 1
+                select = int(user_select) - 1
                 if 0 <= select < max_value:
                     return select
 

@@ -384,7 +384,6 @@ class ManagerCashItems:
         return list(NamesCashItem.select())
 
     def rename_cashitem(self, cashitem_name, cashitem_name_new):
-        print(type(cashitem_name.name), cashitem_name.name)
         cash_item_name = NamesCashItem.get(NamesCashItem.name == cashitem_name.name)
         cash_item_name.name = cashitem_name_new
         cash_item_name.save()
